@@ -31,15 +31,15 @@ const numSelectables = imageUrls.length;
 const selectHeight = selectCanvas.height / numSelectables;
 
 //track the selected tile
-let currentTile = imageUrls[0];
+let currentIndex = 0;
 
 //creating the tilemap nested array
-let tilemap: string[][] = new Array(numTiles);
+let tilemap: number[][] = new Array(numTiles);
 
 for(let i = 0; i < numTiles; i++) {
     let row = new Array(numTiles);
     for (let j = 0; j < numTiles; j++) {
-        row[j] = currentTile;
+        row[j] = currentIndex;
     }
     tilemap[i] = row;
 }
@@ -51,14 +51,13 @@ drawSelectCanvas();
 
 
 //Function that draws a texture to a specific canvas ctx
-function drawTexture(row: number, col: number, ctx: CanvasRenderingContext2D, img_src: string, width: number, height: number, cellSize: number) {
+function drawTexture(row: number, col: number, ctx: CanvasRenderingContext2D, img_index: number, width: number, height: number, cellSize: number) {
     const image= new Image();
-    image.src = img_src;
+    image.src = imageUrls[img_index];
     image.onload = () => {
-        
         ctx.drawImage(image, row * cellSize, col * cellSize, width, height)
     };
-    ctx.drawImage(image, row * cellSize, col * cellSize, width, height)
+    //ctx.drawImage(image, row * cellSize, col * cellSize, width, height)
 }
 
 
@@ -66,7 +65,6 @@ function drawTexture(row: number, col: number, ctx: CanvasRenderingContext2D, im
 
 function redrawTilemap()
 {
-  gridCtx.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
     for (let i = 0; i < numTiles; i++) {
         for (let j = 0; j < numTiles; j++) {
             drawTexture(i, j, gridCtx, tilemap[i][j], gridCanvas.width / numTiles, gridCanvas.height / numTiles, tileSize);
@@ -74,17 +72,20 @@ function redrawTilemap()
     }
 }
 
+
 gridCanvas.addEventListener("mousemove", (e) => {
     if (e.buttons == 1){
         const coordX = Math.trunc(e.offsetX / tileSize);
         const coordY = Math.trunc(e.offsetY / tileSize);
         console.log(coordX,coordY, numTiles);
         if (coordX < numTiles && coordY < numTiles){
-            tilemap[coordX][coordY] = currentTile;
+            tilemap[coordX][coordY] = currentIndex;
         }
         redrawTilemap();
     }
 })
+
+//maybe add mousedown event listener for single click here
 
 
 // ----- Interacting with the selectable tilemap -----
@@ -93,12 +94,12 @@ gridCanvas.addEventListener("mousemove", (e) => {
 function drawSelectCanvas()
 {
     for (let i = 0; i < numSelectables; i++) {
-        drawTexture(0, i, selectCtx, imageUrls[i], selectCanvas.width, selectHeight, 64);
+        drawTexture(0, i, selectCtx, i, selectCanvas.width, selectHeight, 64);
     }
 }
 
 selectCanvas.addEventListener("click", (e) => {
     const coordY = Math.trunc(e.offsetY / selectHeight);
-    currentTile = imageUrls[coordY];
-    console.log(currentTile);
+    currentIndex = coordY;
+    console.log(currentIndex);
 })
